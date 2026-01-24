@@ -42,7 +42,9 @@ const OnboardingPage = () => {
 
   const generateRandomAvatar = () => {
     const seed = Math.random().toString(36).substring(7);
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    const colors = ['b6e3f4', 'c0aede', 'd1d4f9', 'ffd5dc', 'ffdfbf'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=${randomColor}`;
   };
 
    return (
