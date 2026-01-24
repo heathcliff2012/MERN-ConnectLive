@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { upsertStreamUser } from "../lib/stream.js";
@@ -25,9 +26,9 @@ export async function signup(req, res) {
             return res.status(400).json({ message: "Email is already registered." });
         }
 
-        const index = Math.floor(Math.random() * 100) + 1;
-        const randomAvatarUrl = `https://i.pravatar.cc/150?img=${index}`;
-
+        let index = Math.floor(Math.random() * 100) + 1;
+        index = index.toString().substring(7);
+        const randomAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${index}`;        
         const newUser = await User.create({
             fullName,
             email,
