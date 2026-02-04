@@ -1,149 +1,104 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useState} from 'react'
-import { getUserFriends, getOutgoingFriendReqs, getRecomendedUsers,sendFriendRequest } from '../lib/api'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, {useEffect, useMemo} from 'react'
+import { getFriendPosts, getExplorePosts } from '../lib/api'
 import { Link } from 'react-router';
 import { CheckCircleIcon, MapPinIcon, UserIcon, UserPlusIcon } from 'lucide-react';
 import FriendCard from '../components/FriendCard.jsx';
 import NoFriendsFound from '../components/NoFriendsFound.jsx';
+import Posts from '../components/Posts.jsx';
+import { useInView } from 'react-intersection-observer';
 
 const HomePage = () => {
 
-  const queryClient = useQueryClient();
-  const [outGoingRequestsIds, setOutGoingRequestsIds] = useState(new Set()); 
+  const { ref, inView } = useInView();
 
-  const {data: friends=[], isLoading: isLoadingFriends} = useQuery({
-    queryKey: ['friends'],
-    queryFn: getUserFriends
+  const {data: friendPosts =[], isLoading: isLoadingFriendPosts} = useQuery({
+    queryKey: ['friendPosts'],
+    queryFn: getFriendPosts
   });
 
-  const {data: recomendedUsers=[], isLoading: isLoadingRecommendedUsers} = useQuery({
-    queryKey: ['recommendedUsers'],
-    queryFn: getRecomendedUsers
+  const {
+    data,              // Contains 'pages' array
+    isLoading,         // True only for the very first load
+    isFetchingNextPage,// True when loading more pages
+    fetchNextPage,     // Function to trigger the next load
+    hasNextPage,       // Boolean: Is there more data to load?
+  } = useInfiniteQuery({
+    queryKey: ['explorePosts'],
+    queryFn: getExplorePosts, // This now calls api.js with { pageParam }
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => {
+      // The backend returns { posts: [...], nextCursor: "date-string" }
+      // If nextCursor is missing/null, return undefined to stop.
+      return lastPage.nextCursor || undefined; 
+    },
   });
 
-  const {data: outgoingFriendReqs=[], isLoading: isLoadingOutgoingFriendReqs} = useQuery({
-    queryKey: ['outgoingFriendReqs'],
-    queryFn: getOutgoingFriendReqs
-  });
-
-  const {mutate: sendRequestMutate, isPending} = useMutation({
-    mutationFn: sendFriendRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['outgoingFriendReqs']});
-    }
-  });
+  const allExplorePosts = data?.pages?.flatMap(page => {
+      if (!page) return [];
+      return Array.isArray(page) ? page : page.posts || [];
+  }) || [];
 
   useEffect(() => {
-    const outgoingIds = new Set();
-    if(outgoingFriendReqs && outgoingFriendReqs.length > 0){
-      outgoingFriendReqs.forEach(req => {
-        outgoingIds.add(req.recipient._id);
-      })
-      setOutGoingRequestsIds(outgoingIds);
+    if (inView && hasNextPage) {
+      fetchNextPage();
     }
-  }, [outgoingFriendReqs]);
-
-
-
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className='p-4 sm:p-6 md:p-8 h-fit bg-base-100 min-h-screen'>
-      <div className="container mx-auto space-y-10 w-10/11">
-        <div className="flex  sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h2 className='text-2xl sm:text-3xl font-bold tracking-tight'>Your Friends</h2>
-          <Link to = "/notifications" className='btn btn-outline btn-sm'>
-            <UserIcon className='size-4 mr-2' />
-            Friend Requests
-          </Link>
-        </div>
+    <div className='min-h-screen w-full flex flex-col bg-base-100'>
+        <section className="container mx-auto p-4 mt-6 justify-center w-full">
+            <h2 className="text-2xl font-bold mb-4">Recent Friend Posts</h2>
+            {isLoadingFriendPosts ? (
+              <div className="flex justify-center py-12">
+                <span className='loading loading-spinner loading-lg'/>
+              </div>
+            ) : friendPosts.length === 0 ? (
+              <NoFriendsFound title="No Recent posts from friends yet." body = "Start connecting with friends to see their posts here!" />
+            ) : (
+              friendPosts.map((post) => (
+                <div key={post._id} className="mb-6 p-4 bg-base-100 rounded-lg shadow">
+                  <Posts post={post} userProfile={post.user} />
+                </div>
+              ))
+            )}
+        </section>
 
-        {isLoadingFriends ? (
+        {/* --- EXPLORE POSTS --- */}
+      <section className="container mx-auto p-4 mt-6 justify-center w-full">
+        <h2 className="text-2xl font-bold mb-4">Explore Posts</h2>
+        
+        {isLoading ? (
           <div className="flex justify-center py-12">
             <span className='loading loading-spinner loading-lg'/>
           </div>
-          
-        ) : friends.length === 0 ? (
-          <NoFriendsFound />
         ) : (
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {friends.map(friend => (
-              <FriendCard key={friend._id} friend={friend} />
+          <>
+            {/* 👇 Render using our safe 'allExplorePosts' variable */}
+            {allExplorePosts.map((post) => (
+               <div key={post._id} className="mb-6 p-4 bg-base-100 rounded-lg shadow">
+                 <Posts post={post} userProfile={post.user} />
+               </div>
             ))}
-          </div>
+
+            {/* Empty State Check */}
+            {allExplorePosts.length === 0 && (
+               <NoFriendsFound title="No posts to explore." body="Check back later!" />
+            )}
+          </>
         )}
 
-        <section>
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Meet New People</h2>
-                <p className="opacity-70">
-                  Discover and connect with people who share your interests!
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* --- SCROLL TRIGGER --- */}
+        <div ref={ref} className="flex justify-center py-8">
+            {isFetchingNextPage && <span className='loading loading-spinner loading-md'/>}
+            
+            {/* "No more posts" message */}
+            {!hasNextPage && allExplorePosts.length > 0 && (
+                <span className="text-sm opacity-50">No more posts to load</span>
+            )}
+        </div>
 
-          {isLoadingRecommendedUsers ? (
-            <div className="flex justify-center py-12">
-              <span className='loading loading-spinner loading-lg'/>
-            </div>
-            ) : recomendedUsers.length === 0 ? (
-              <div className='card bg-base-200 p-6 text-center rounded-md'>
-                <h3 className='font-semibold text-lg mb-2'>No new users to recommend.</h3>
-                <p className='text-base-content opacity-70'>Check back later for new people!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {recomendedUsers.map(user => {
-                  const isRequestSent = outGoingRequestsIds.has(user._id);
-
-                  return (
-                    <div key={user._id} className='bg-base-200 hover:shadow-md transition-all duration-300 rounded-lg cursor-pointer' onClick={() => handleRedirectToProfile(user._id)}>
-                      <div className="card-body p-5 space-y-4">
-                        <div className="flex items-center gap-4 mb-3">
-                          <div className="avatar size-16 rounded-full border">
-                            <img src={user.profilePic} alt={user.fullName} className='rounded-full'/>
-                          </div>
-                          <div>
-                            <h3 className='font-semibold text-lg truncate'>{user.fullName}</h3>
-                            {user.location && (
-                            <div className="flex items-center text-xs opacity-70 mt-1">
-                              <MapPinIcon className='size-4 mr-1' />
-                              <span>{user.location}</span>
-                            </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action button */}
-                      <button
-                        className={`btn w-full mt-2 ${
-                          isRequestSent ? "btn-disabled" : "btn-primary"
-                        } `}
-                        onClick={() => sendRequestMutate(user._id)}
-                        disabled={isRequestSent || isPending}
-                      >
-                        {isRequestSent ? (
-                          <>
-                            <CheckCircleIcon className="size-4 mr-2" />
-                            Request Sent
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            Send Friend Request
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
+      </section>
     </div>
   );
 };

@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
     },
+    isVerified:{
+    type: Boolean,
+    default: false
+    },
+    lastLogin:{
+    type: Date,
+    default: Date.now
+    },
     friends:[{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
@@ -40,6 +48,26 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   }],
+    posts:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post"
+  }],
+  comments:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Comment"
+  }],
+  resetPasswordToken:{
+    type: String
+  },
+  resetPasswordExpires:{
+    type: Date
+  },
+  verificationToken:{
+    type: String
+  },
+  verificationTokenExpires:{
+    type: Date
+  },
 
 }, { timestamps: true });
 

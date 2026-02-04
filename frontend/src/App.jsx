@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Routes, Route,Navigate } from 'react-router'
 import HomePage from './pages/HomePage'
 import SignUpPage from './pages/SignUpPage'
@@ -7,11 +7,18 @@ import OnboardingPage from './pages/OnboardingPage'
 import ChatPage from './pages/ChatPage'
 import CallPage from './pages/CallPage'
 import NotificationsPage from './pages/NotificationsPage'
+import FriendsPage from './pages/FriendsPage'
 import {Toaster} from 'react-hot-toast'
 import PageLoader from './components/PageLoader'
 import useAuthUser from './hooks/useAuthUser'
 import Layout from './components/Layout.jsx'
 import { useThemeStore } from './store/useThemeStore.js'
+import UserProfilePage from './pages/UserProfilePage.jsx'
+import AddNewPostPage from './pages/AddNewPostPage.jsx'
+import ProfilePage from './pages/ProfilePage.jsx'
+import EmailVerificationPage from './pages/EmailVerificationPage.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 
 
 const App = () => {
@@ -22,6 +29,7 @@ const App = () => {
 
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = Boolean(authUser?.isOnboarded);
+  const isVerified = Boolean(authUser?.isVerified);
 
   if(isLoading){
     return <PageLoader />
@@ -29,20 +37,142 @@ const App = () => {
 
 
   return (
-    <div className="h-screen" data-theme={theme}>
-      <Routes>
-        <Route path="/" element={isAuthenticated && isOnboarded ? <Layout showSidebar={true}><HomePage /></Layout> : (<Navigate to={isAuthenticated ? "/onboarding" : "/login"} />)} />
-        <Route path="/signup" element={!isAuthenticated ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!isAuthenticated ?(<LoginPage />)  : (!isOnboarded ? <Navigate to="/onboarding" /> : <Navigate to="/" />)} />
-        <Route path="/onboarding" element={isAuthenticated ? (!isOnboarded ? <OnboardingPage /> : <Navigate to="/" />) : <Navigate to="/login" />} />
-        <Route path="/chat" element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" />} />
-        <Route path="/call" element={isAuthenticated ? <CallPage /> : <Navigate to="/login" />} />
-        <Route path="/notifications" element={isAuthenticated ? <NotificationsPage /> : <Navigate to="/login" />} />
-      </Routes>
+  <div className="h-screen" data-theme={theme}>
+    <Routes>
+      {/* --- Protected Routes (Home, Chat, Profile, etc.) --- */}
+      {/* Logic: Must be Auth + Verified + Onboarded. If not, redirect to the specific missing step. */}
+      
+      <Route
+        path="/"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true} showSearchBar={true}><HomePage /></Layout>
+        }
+      />
 
-      <Toaster />
-    </div>
-  )
+      <Route
+        path="/chat/:id"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={false}><ChatPage /></Layout>
+        }
+      />
+
+      <Route
+        path="/call/:id"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <CallPage />
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true}><NotificationsPage /></Layout>
+        }
+      />
+
+      <Route
+        path="/friends"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true} showSearchBar={true}><FriendsPage /></Layout>
+        }
+      />
+
+      <Route
+        path="/user-profile"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true}><UserProfilePage /></Layout>
+        }
+      />
+
+      <Route
+        path="/add-post"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true}><AddNewPostPage /></Layout>
+        }
+      />
+
+      <Route
+        path="/user-profile/:id"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Layout showSidebar={true}><ProfilePage /></Layout>
+        }
+      />
+
+      {/* --- Public / Entry Routes --- */}
+      
+      <Route
+        path="/signup"
+        element={
+          !isAuthenticated ? <SignUpPage /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Navigate to="/" />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          !isAuthenticated ? <LoginPage /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          !isOnboarded ? <Navigate to="/onboarding" /> :
+          <Navigate to="/" />
+        }
+      />
+
+      {/* --- Intermediate Steps --- */}
+
+      <Route
+        path="/verify-email"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          isVerified ? <Navigate to="/" /> : 
+          <EmailVerificationPage />
+        }
+      />
+
+      <Route
+        path="/onboarding"
+        element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          !isVerified ? <Navigate to="/verify-email" /> :
+          isOnboarded ? <Navigate to="/" /> :
+          <OnboardingPage />
+        }
+      />
+
+      <Route path = "/forgot-password" element={ <ForgotPassword />} />
+
+      <Route path = "/reset-password/:token" element={ <ResetPassword />} />
+
+    </Routes>
+    <Toaster />
+  </div>
+);
 }
 
 export default App

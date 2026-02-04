@@ -1,9 +1,10 @@
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
-const Layout = ({showSidebar = false, children}) => {
+const Layout = ({showSidebar = false, children, showSearchBar = false}) => {
   return (
     <div className="min-h-screen">
+        
         <div className="flex ">
             {
                 showSidebar && (
@@ -12,7 +13,7 @@ const Layout = ({showSidebar = false, children}) => {
             }
 
             <div className="flex-1 flex flex-col">
-                <Navbar />
+                <Navbar showSearchBar={showSearchBar} />
                 <main className = "flex-1 overflow-y-auto">
                     {children}
                 </main>

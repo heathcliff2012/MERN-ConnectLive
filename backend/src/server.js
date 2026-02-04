@@ -7,13 +7,14 @@ dotenv.config();
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js'
 import chatRoutes from './routes/chat.route.js';
+import postRoutes from './routes/post.route.js';
 import { connectDB } from './lib/db.js';
 
 import cors from 'cors';
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/chat',chatRoutes);
+app.use('/api/posts',postRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);

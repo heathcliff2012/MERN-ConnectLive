@@ -1,9 +1,10 @@
 import React from 'react'
 import { useState } from 'react'
-import {ShipWheelIcon} from "lucide-react"
+import {LockKeyhole, Mail, ShipWheelIcon, UserRound} from "lucide-react"
 import { Link } from 'react-router'
 import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query'
 import { signup } from '../lib/api'
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 
 const SignUpPage = () => {
 
@@ -52,48 +53,74 @@ const SignUpPage = () => {
 
               <div className='space-y-3'>
                 <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Full Name</span>
-                  </label> 
-                  <input 
-                    type="text" 
-                    placeholder="John Doe" 
-                    className="input input-bordered w-full" 
-                    value={signUpData.fullName}
-                    onChange={(e) => setSignUpData({...signUpData, fullName: e.target.value})}
-                    required
-                  />
+                    <label className="label">
+                        <span className="label-text">Full Name</span>
+                    </label>
+                    <div className="relative">
+                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                            <UserRound className="size-5 text-primary/70"/>
+                        </div>
+                        
+                        <input 
+                            type="text" 
+                            placeholder="John Doe" 
+                            className="input input-bordered w-full pl-10" 
+                            value={signUpData.fullName}
+                            onChange={(e) => setSignUpData({...signUpData, fullName: e.target.value})}
+                            required 
+                        />
+                    </div>
                 </div>
+              </div>
+
+              <div className='space-y-3'>
                 <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label> 
-                  <input 
-                    type="email" 
-                    placeholder="john.doe@example.com" 
-                    className="input input-bordered w-full" 
-                    value={signUpData.email}
-                    onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
-                    required
-                  />
+                    <label className="label">
+                        <span className="label-text">Email</span>
+                    </label>
+                    <div className="relative">
+                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                            <Mail className="size-5 text-primary/70"/>
+                        </div>
+                        
+                        <input 
+                            type="text" 
+                            placeholder="john.doe@example.com" 
+                            className="input input-bordered w-full pl-10" 
+                            value={signUpData.email}
+                            onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
+                            required 
+                        />
+                    </div>
                 </div>
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label> 
-                  <input 
-                    type="password" 
-                    placeholder="Your password" 
-                    className="input input-bordered w-full" 
-                    value={signUpData.password}
-                    onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
-                    required
-                  />
-                  <p className='text-xs opacity-70'>Your password must be at least 6 characters long.</p>
+                
+                <div className='space-y-3'>
+                  <div className="form-control w-full">
+                      <label className="label">
+                          <span className="label-text">Password</span>
+                      </label>
+                      <div className="relative">
+                          {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                              <LockKeyhole className="size-5 text-primary/70"/>
+                          </div>
+                          
+                          <input 
+                              type="password" 
+                              placeholder="Create a password" 
+                              className="input input-bordered w-full pl-10" 
+                              value={signUpData.password}
+                              onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
+                              required 
+                          />
+                      </div>
+                  </div>
+                  <PasswordStrengthMeter password={signUpData.password} />
                 </div>
               </div>
               <button type="submit" className="btn btn-primary w-full">{isPending ? "Creating Account..." : "Create Account"}</button>
-
               <div className="text-center mt-4">
                 <p className="text-sm">
                   Already have an account?{' '}

@@ -3,7 +3,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useState } from 'react';
 import { login } from '../lib/api';
 import { toast } from 'react-hot-toast';
-import { ShipWheelIcon } from 'lucide-react';
+import { LockKeyhole, Mail, ShipWheelIcon } from 'lucide-react';
 import { Link } from 'react-router';
 
 const LoginPage = () => {
@@ -53,35 +53,57 @@ const LoginPage = () => {
 
               <div className="flex flex-col gap-3 mt-4">
                 <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label> 
-                  <input 
-                    type="text" 
-                    placeholder="JohnDoe@example.com" 
-                    className="input input-bordered w-full" 
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                    required
-                  />
+                    <label className="label">
+                        <span className="label-text">Email</span>
+                    </label>
+                    <div className="relative">
+                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                            <Mail className="size-5 text-primary/70"/>
+                        </div>
+                        
+                        <input 
+                            type="text" 
+                            placeholder="john.doe@example.com" 
+                            className="input input-bordered w-full pl-10" 
+                            value={loginData.email}
+                            onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                            required 
+                        />
+                    </div>
                 </div>
-                <div className="form-control w-full mt-4">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label> 
-                  <input 
-                    type="password" 
-                    placeholder="********" 
-                    className="input input-bordered w-full" 
-                    value={loginData.password}
-                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                    required
-                  />
+                
+                <div className='space-y-3'>
+                  <div className="form-control w-full">
+                      <label className="label">
+                          <span className="label-text">Password</span>
+                      </label>
+                      <div className="relative">
+                          {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                              <LockKeyhole className="size-5 text-primary/70"/>
+                          </div>
+                          
+                          <input 
+                              type="password" 
+                              placeholder="Enter your password" 
+                              className="input input-bordered w-full pl-10" 
+                              value={loginData.password}
+                              onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                              required 
+                          />
+                      </div>
+                  </div>
                 </div>
 
                 <button type="submit" disabled={isPending} className="btn btn-primary w-full">
                   {isPending ? (<span className='loading loading-spinner loading-xs'>Logging in...</span>) : "Login"}
                 </button>
+                <div className="flex justify-center text-sm opacity-70">
+                  <Link to="/forgot-password">
+                    <span className='text-primary hover:underline cursor-pointer'>forgot password?</span>
+                  </Link>
+                </div>
 
                 <div className="text-center mt-4">
                 <p className="text-sm">
