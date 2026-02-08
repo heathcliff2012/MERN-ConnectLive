@@ -209,3 +209,24 @@ export const resetPassword = async ({ token, password }) => {
     throw error;
   }
 };
+
+export const deletePost = async (postId) => {
+    try {
+        const response = await axiosInstance.post(`/posts/delete-post/${postId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        throw error;
+    }
+};
+
+export const deleteComment = async ({postId, commentId}) => {
+    try {
+        const response = await axiosInstance.post(`/posts/delete-comment/${postId}/${commentId}`);
+        console.log("Delete comment response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        throw error;
+    }
+};

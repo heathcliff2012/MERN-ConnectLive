@@ -83,7 +83,46 @@ export async function getPostComments(req, res){
     }
 }
 
+export async function deletePost(req, res){
+    try{
+        const {id} = req.params;
+        const currentUserId = req.user._id;
+        const post = await Post.findById(id);
 
+        if(!post){
+            return res.status(404).json({message: "Post not found"});
+        }
+        if(post.user.toString() !== currentUserId.toString()){
+            return res.status(403).json({message: "Unauthorized to delete this post"});
+        }
+        await Post.findByIdAndDelete(id);
+        res.json({message: "Post deleted successfully"});
+    }catch(error){
+        console.log("Error in deleting post " + error);
+        res.status(500).json({message: "Failed to delete post", error});
+    }
+}
 
+export async function deleteComment(req, res){
+    try{
+        const {postId, commentId} = req.params;
+        const currentUserId = req.user._id;
+        const post = await Post.findById(postId);
 
-
+        if(!post){
+            return res.status(404).json({message: "Post not found"});
+        }
+        const comment = await Comment.findById(commentId);
+        if(!comment){
+            return res.status(404).json({message: "Comment not found"});
+        }
+        if(comment.user.toString() !== currentUserId.toString()){
+            return res.status(403).json({message: "Unauthorized to delete this comment"});
+        }
+        await Comment.findByIdAndDelete(commentId);
+        res.json({message: "Comment deleted successfully"});
+    }catch(error){
+        console.log("Error in deleting comment " + error);
+        res.status(500).json({message: "Failed to delete comment", error});
+    }
+}

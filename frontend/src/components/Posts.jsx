@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart, MessageCircle, Send } from 'lucide-react';
 import { Link } from 'react-router';
 import React, { useState } from 'react'
-import { addComment, addLikeToComment, getComments, likePost } from '../lib/api';
+import { addComment, addLikeToComment, deleteComment, deletePost, getComments, likePost } from '../lib/api';
 import toast from 'react-hot-toast';
 import useAuthUser from '../hooks/useAuthUser';
 
@@ -18,7 +18,6 @@ const Posts = ({ post, userProfile }) => {
     const {data: commentsData, isLoading: commentsLoading} = useQuery({
         queryKey: ['comments', post._id],
         queryFn: () => getComments(post._id),
-        enabled: commentsOpen, // Fetch only when opened
     });
 
     const {mutate: addCommentMutate } = useMutation({
@@ -49,13 +48,44 @@ const Posts = ({ post, userProfile }) => {
     },
   });
 
+    const {mutate: deleteCommentMutate } = useMutation({
+        mutationFn: deleteComment,
+        onSuccess: () => {
+            query.invalidateQueries({ queryKey: ['comments', post._id] });
+            toast.success('Comment deleted successfully');
+        },
+    });
+
+    const {mutate: deletePostMutate } = useMutation({
+        mutationFn: deletePost,
+        onSuccess: () => {
+            query.invalidateQueries({ queryKey: ['userProfileData']});
+            query.invalidateQueries({ queryKey: ['profile']});
+            query.invalidateQueries({ queryKey: ['userProfile']});
+            query.invalidateQueries({ queryKey: ['explorePosts']});
+            query.invalidateQueries({ queryKey: ['friendsPosts']});
+            query.invalidateQueries({ queryKey: ['comments', post._id] });
+            toast.success('Post deleted successfully');
+        },
+    });
+
     const handleAddComment = (e) => {
         e.preventDefault();
         if (!text.trim()) return;
         addCommentMutate({postId: post._id, text: text});
     }
 
+    const deletePostHandler = () => {
+        const deleteModal = document.getElementById("delete_post_modal");
+        deleteModal.showModal();
+    }
 
+    const handleDeleteComment = () => {
+        const deleteModal = document.getElementById("delete_comment_modal");
+        deleteModal.showModal();
+    }
+
+    
     return (
         <div 
             key={post._id} 
@@ -82,6 +112,11 @@ const Posts = ({ post, userProfile }) => {
                             <span className="font-bold">{userProfile.fullName}</span>
                         </div>
                     </Link>
+                    <div className="flex justify-end">
+                        {currentUser?.authUser?._id === userProfile._id && (
+                            <button onClick={deletePostHandler} className="text-red-500 text-sm hover:underline cursor-pointer">Delete Post</button>
+                        )}
+                    </div>
 
                     {/* Content */}
                     <div>
@@ -156,11 +191,41 @@ const Posts = ({ post, userProfile }) => {
                                     <span className="font-bold text-xs">{comment.user.fullName}</span>
                                 </div>
                                 <p className=" break-words">{comment.text}</p>
-                                <div className="flex items-center gap-2 mt-2 cursor-pointer" onClick={() => likeCommentMutate({postId: post._id, commentId: comment._id})}> 
-                                    <Heart className={`size-3 inline-block mr-1 ${comment.likes?.includes(currentUser?.authUser?._id) > 0 ? 'fill-red-500 text-red-500' : 'text-gray-300'} `}/>
-                                    <span className="text-xs opacity-70 mr-3" >{comment.likes?.length || 0}</span>
+                                <div className="flex items-center gap-2 mt-2 cursor-pointer" > 
+                                    <Heart 
+                                        className={`size-3 inline-block mr-1 ${comment.likes?.includes(currentUser?.authUser?._id) > 0 ? 'fill-red-500 text-red-500' : 'text-gray-300'} `}
+                                        onClick={() => likeCommentMutate({postId: post._id, commentId: comment._id})}
+                                        />
+                                    <span className="text-xs opacity-70 mr-3" onClick={() => likeCommentMutate({postId: post._id, commentId: comment._id})}>{comment.likes?.length || 0}</span>
                                     <div className="text-xs opacity-70 justify-start" >{new Date(comment.createdAt).toLocaleString()}</div>
+                                    {currentUser?.authUser?._id === comment.user._id && (
+                                        <button 
+                                            className="text-red-500 text-xs hover:underline ml-auto"
+                                            onClick={() => handleDeleteComment()}
+                                        >
+                                            Delete
+                                        </button>
+                                    
+                                    )}
                                 </div>
+                                <dialog id="delete_comment_modal" className="modal">
+                                    <div className="modal-box">
+                                        <h3 className="font-bold text-lg text-error">Delete Comment</h3>
+                                        <p className="py-4">This action cannot be undone. Are you sure?</p>
+                                        <div className="modal-action">
+                                            <form method="dialog">
+                                                {/* if there is a button in form, it will close the modal */}
+                                                <button className="btn btn-ghost mr-2">Cancel</button>
+                                                <button 
+                                                    className="btn btn-error" 
+                                                    onClick={() => {deleteCommentMutate({postId: post._id, commentId: comment._id})}}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </dialog>
                             </div>
                         ))}
                     </div>
@@ -183,6 +248,24 @@ const Posts = ({ post, userProfile }) => {
 
                 </div>
             </div>
+            <dialog id="delete_post_modal" className="modal">
+                <div className="modal-box">
+                    <h3 className="font-bold text-lg text-error">Delete Post</h3>
+                    <p className="py-4">This action cannot be undone. Are you sure?</p>
+                    <div className="modal-action">
+                        <form method="dialog">
+                            {/* if there is a button in form, it will close the modal */}
+                            <button className="btn btn-ghost mr-2">Cancel</button>
+                            <button 
+                                className="btn btn-error" 
+                                onClick={() => deletePostMutate(post._id)}
+                            >
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
         </div>
     )
 }
