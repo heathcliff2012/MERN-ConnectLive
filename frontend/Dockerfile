@@ -11,7 +11,9 @@ COPY . .
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NODE_OPTIONS="--max-old-space-size=2560"
+
+ENV GENERATE_SOURCEMAP=false
 
 RUN npm run build
 
