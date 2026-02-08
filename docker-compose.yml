@@ -10,7 +10,10 @@ services:
       - "5001:5001"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_BACKEND_URL: http://43.205.206.93:5001/api
     container_name: frontend
     restart: always
     env_file:
