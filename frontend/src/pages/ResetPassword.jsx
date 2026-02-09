@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react'
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
-import { forgotPassword, resetPassword } from '../lib/api';
+import React, { useState } from 'react'
+import { QueryClient, useMutation } from '@tanstack/react-query';
+import { resetPassword } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { LockKeyhole, Mail } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';

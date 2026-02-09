@@ -19,17 +19,17 @@ const ProfilePage = () => {
     onSuccess: () => queryClient.invalidateQueries(['Profile', id]),
     });
 
-    const {data: outgoingFriendReqs=[], isLoading: isLoadingOutgoingFriendReqs} = useQuery({
+    const {data: outgoingFriendReqs=[]} = useQuery({
         queryKey: ['outgoingFriendReqs'],
         queryFn: getOutgoingFriendReqs
       });
     
-    const {data: incomingFriendReqs, isLoading: isLoadingIncomingFriendReqs} = useQuery({
+    const {data: incomingFriendReqs} = useQuery({
         queryKey: ['incomingFriendReqs'],
         queryFn: getFriendRequests
       });
     
-      const {mutate: sendRequestMutate, isPending} = useMutation({
+      const {mutate: sendRequestMutate} = useMutation({
         mutationFn: sendFriendRequest,
         onSuccess: () => {
           queryClient.invalidateQueries({queryKey: ['outgoingFriendReqs']});

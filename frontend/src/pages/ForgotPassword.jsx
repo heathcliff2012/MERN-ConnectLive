@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react'
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react'
+import { QueryClient, useMutation } from '@tanstack/react-query';
 import { forgotPassword } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { LockKeyhole, Mail } from 'lucide-react';
@@ -10,7 +10,7 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('')
     const [isResetLinkSent, setIsResetLinkSent] = useState(false)
 
-    const {mutate: forgotPasswordMutate, isPending, error} = useMutation({
+    const {mutate: forgotPasswordMutate, error} = useMutation({
     mutationFn: forgotPassword,
     onSuccess: () => {
       toast.success("email sent successfully!");

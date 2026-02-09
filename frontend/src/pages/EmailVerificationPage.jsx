@@ -1,6 +1,4 @@
-import React, { use, useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router';
-import useAuthUser from '../hooks/useAuthUser';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { verifyEmail } from '../lib/api';
 import { toast } from 'react-hot-toast';
@@ -9,12 +7,9 @@ const EmailVerificationPage = () => {
 
     const [code, setCode] = useState(['','','','','','']);
     const inputRefs = useRef([]);
-    const navigate = useNavigate();
-
-    const authUser = useAuthUser().authUser;
     const queryClient = useQueryClient();
 
-    const {mutate: verifyEmailMutate, isPending, error} = useMutation({
+    const {mutate: verifyEmailMutate, error} = useMutation({
     mutationFn: verifyEmail,
     onSuccess: () => {
       toast.success("email verified successfully!");

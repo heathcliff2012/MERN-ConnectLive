@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'; // Added useRef
+import React, { useRef, useState } from 'react'; // Added useRef
 import useAuthUser from '../hooks/useAuthUser';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';

@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import {LockKeyhole, Mail, ShipWheelIcon, UserRound} from "lucide-react"
 import { Link } from 'react-router'
-import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { signup } from '../lib/api'
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 

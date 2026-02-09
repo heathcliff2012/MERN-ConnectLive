@@ -1,7 +1,7 @@
-import { Query, QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Query, QueryClient, useQuery } from '@tanstack/react-query';
 import React from 'react'
-import {  getUserProfile, likePost } from '../lib/api';
-import { CircleFadingPlusIcon, Heart, MapPin, MapPinIcon, MessageCircle } from 'lucide-react';
+import {  getUserProfile } from '../lib/api';
+import { CircleFadingPlusIcon, MapPinIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import Posts from '../components/Posts';
 

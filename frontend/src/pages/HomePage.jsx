@@ -1,5 +1,5 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, {useEffect, useMemo} from 'react'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import React, {useEffect} from 'react'
 import { getFriendPosts, getExplorePosts } from '../lib/api'
 import { Link } from 'react-router';
 import { CheckCircleIcon, MapPinIcon, UserIcon, UserPlusIcon } from 'lucide-react';
