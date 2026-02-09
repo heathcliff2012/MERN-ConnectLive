@@ -294,7 +294,7 @@ export async function getComments(req, res) {
 export async function addLikeToComment(req, res) {
   try {
     const userId = req.user._id;
-    const { postId, commentId } = req.params;
+    const { commentId } = req.params;
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found." });
