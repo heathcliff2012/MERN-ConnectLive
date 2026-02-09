@@ -163,7 +163,7 @@ export async function forgotPassword(req, res) {
         user.resetPasswordToken = resetPasswordToken;
         user.resetPasswordExpires = resetPasswordExpires;
         await user.save();
-        const resetURL = `http://${process.env.FRONTEND_URL}/reset-password/${resetPasswordToken}`;
+        const resetURL = `http://13.201.87.111:5173//reset-password/${resetPasswordToken}`;
 
         await sendPasswordResetEmail(email, resetURL, user.fullName);
     } catch (error) {
