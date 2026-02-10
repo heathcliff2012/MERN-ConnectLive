@@ -5,7 +5,7 @@ import { login } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { LockKeyhole, Mail, ShipWheelIcon } from 'lucide-react';
 import { Link } from 'react-router';
-import signupImage from '../assets/signup.svg';
+import signupImage from '../assets/signup.svg'; // ✅ Correct
 
 const LoginPage = () => {
 
