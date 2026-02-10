@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { signup } from '../lib/api'
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
+import signupImage from '../assets/signup.svg'
 
 const SignUpPage = () => {
 
@@ -57,7 +58,6 @@ const SignUpPage = () => {
                         <span className="label-text">Full Name</span>
                     </label>
                     <div className="relative">
-                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                             <UserRound className="size-5 text-primary/70"/>
                         </div>
@@ -80,7 +80,6 @@ const SignUpPage = () => {
                         <span className="label-text">Email</span>
                     </label>
                     <div className="relative">
-                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                             <Mail className="size-5 text-primary/70"/>
                         </div>
@@ -135,7 +134,7 @@ const SignUpPage = () => {
         </div>
         <div className='hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center m-[-30px]]'>
           <div className="relative aspect-square max-w-sm mx-auto">
-            <img src="/signup.svg" alt="Sign Up Illustration" className="w-full h-full"/>
+            <img src={signupImage} alt="Sign Up Illustration" className="w-full h-full"/>
           </div>
         </div>
       </div>

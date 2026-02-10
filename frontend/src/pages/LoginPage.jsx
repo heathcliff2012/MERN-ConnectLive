@@ -5,6 +5,7 @@ import { login } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { LockKeyhole, Mail, ShipWheelIcon } from 'lucide-react';
 import { Link } from 'react-router';
+import signupImage from '../assets/signup.svg';
 
 const LoginPage = () => {
 
@@ -57,7 +58,6 @@ const LoginPage = () => {
                         <span className="label-text">Email</span>
                     </label>
                     <div className="relative">
-                        {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                             <Mail className="size-5 text-primary/70"/>
                         </div>
@@ -79,7 +79,6 @@ const LoginPage = () => {
                           <span className="label-text">Password</span>
                       </label>
                       <div className="relative">
-                          {/* 1. Added 'z-10' to ensure it sits on top of the input background */}
                           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                               <LockKeyhole className="size-5 text-primary/70"/>
                           </div>
@@ -121,7 +120,7 @@ const LoginPage = () => {
         {/* RIGHT SIDE - IMAGE */}
         <div className="hidden lg:block lg:w-1/2 bg-primary/10">
           <img 
-            src="../public/signup.svg" 
+            src={signupImage} 
             alt="Login Illustration" 
             className="w-full h-full object-cover"
           />

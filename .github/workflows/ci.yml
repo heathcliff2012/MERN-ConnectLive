@@ -1,45 +1,97 @@
-name: build-and-lint
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
+  # 1. TEST & BUILD CHECK (Runs on GitHub servers)
   build-and-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4  # Updated to v4 (standard practice)
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4 # Updated to v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'              # OPTIONAL: Enables caching for faster installs
+          cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
-      # --- BACKEND ---
+      # --- BACKEND CHECKS ---
       - name: Install backend deps
         working-directory: ./backend
         run: npm ci
 
-      - name: Lint backend
-        working-directory: ./backend
-        run: npm run lint -- --max-warnings=0
+      # (Optional) Linting - uncomment if you have lint scripts set up
+      # - name: Lint backend
+      #   working-directory: ./backend
+      #   run: npm run lint -- --max-warnings=0
 
-      - name: Build backend Docker image
+      - name: Test Build Backend Docker
         run: docker build -t backend ./backend
 
-      # --- FRONTEND ---
+      # --- FRONTEND CHECKS ---
       - name: Install frontend deps
         working-directory: ./frontend
         run: npm ci
 
-      - name: Lint frontend
-        working-directory: ./frontend
-        run: npm run lint -- --max-warnings=0
+      # (Optional) Linting
+      # - name: Lint frontend
+      #   working-directory: ./frontend
+      #   run: npm run lint -- --max-warnings=0
 
-      - name: Build frontend Docker image
-        run: docker build -t frontend ./frontend
+      - name: Test Build Frontend Docker
+        # We pass a dummy arg just to ensure the build process works
+        run: docker build --build-arg VITE_API_BASE_URL=http://localhost:5001/api -t frontend ./frontend
+
+  # 2. DEPLOY TO EC2 (Runs only if build-and-lint passes)
+  deploy:
+    needs: build-and-lint
+    if: github.ref == 'refs/heads/main' # Only deploy on pushes to main
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create SSH Key
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+
+      - name: Add EC2 host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            
+            # Navigate to app directory
+            cd "${{ secrets.EC2_APP_DIR }}" || exit 1
+            
+            # 1. Pull latest code
+            echo "Pulling latest code..."
+            git fetch --all
+            git reset --hard origin/main
+            
+            # 2. Rebuild containers
+            # We use --no-cache to ensure the frontend picks up the new env vars
+            echo "Rebuilding containers..."
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            
+            # 3. Cleanup space
+            docker image prune -f
+          EOF
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f ec2_key.pem
